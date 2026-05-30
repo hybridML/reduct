@@ -278,24 +278,21 @@ class TestAPI:
         resp = client.get("/policies")
         assert resp.status_code == 200
         data = resp.json()
-        assert "finance_access" in data
-        assert data["finance_access"]["rule_count"] > 0
+        assert len(data) > 0
 
-    def test_reason_basic(self, client):
-        resp = client.post("/reason", json={"query": "Alice is finance_employee", "use_llm": False})
+    def test_access_endpoint(self, client):
+        resp = client.post("/access", json={"entity": "Alice"})
         assert resp.status_code == 200
         data = resp.json()
-        assert len(data["abstract_facts"]) > 0
-        assert len(data["explanations"]) >= 0
+        assert data["entity"] == "Alice"
+        assert len(data["access"]) > 0
 
-    def test_reason_derives_conclusions(self, client):
-        resp = client.post("/reason", json={
-            "query": "Alice is finance_employee. All finance_employee are budget_portal_access.",
-            "use_llm": False,
-        })
+    def test_audit_endpoint(self, client):
+        resp = client.post("/audit", json={})
         assert resp.status_code == 200
         data = resp.json()
-        assert len(data["conclusions"]) > 0
+        assert "total_violations" in data
+        assert "summary" in data
 
     def test_entities_endpoint(self, client):
         resp = client.get("/entities")

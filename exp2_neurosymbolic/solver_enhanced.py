@@ -259,7 +259,10 @@ class EnhancedProvenanceSolver:
         all_facts = self._all_facts()
         constraints = [f for f in all_facts if f.predicate == "AT_MOST"]
         for c in constraints:
-            max_count = int(c.subject)
+            try:
+                max_count = int(c.subject)
+            except (ValueError, TypeError):
+                continue
             role = c.obj
             holders = [f for f in all_facts if f.predicate == "IS" and f.obj == role]
             if len(holders) > max_count:
@@ -273,7 +276,10 @@ class EnhancedProvenanceSolver:
 
         exact_constraints = [f for f in all_facts if f.predicate == "EXACTLY"]
         for c in exact_constraints:
-            count = int(c.subject)
+            try:
+                count = int(c.subject)
+            except (ValueError, TypeError):
+                continue
             role = c.obj
             holders = [f for f in all_facts if f.predicate == "IS" and f.obj == role]
             if len(holders) != count:
