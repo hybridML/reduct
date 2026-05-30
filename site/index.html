@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reduct — Privacy-Preserving Reasoning Engine</title>
+    <meta name="description" content="Reason about access control, compliance, and policy without ever exposing entity names to the model. Fully local. Provably correct.">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta property="og:title" content="Reduct — Privacy-Preserving Reasoning Engine">
+    <meta property="og:description" content="The AI never sees your data. Structural abstraction, not redaction.">
+    <meta property="og:type" content="website">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="site.css">
+</head>
+<body>
+    <nav id="nav">
+        <div class="nav-inner">
+            <a href="#" class="logo">reduct</a>
+            <div class="nav-links">
+                <a href="#how-it-works">How It Works</a>
+                <a href="#capabilities">Capabilities</a>
+                <a href="#verticals">Verticals</a>
+                <a href="#api">API</a>
+                <a href="#proof">Proof</a>
+                <a class="nav-cta" href="#get-started">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
+    <section id="hero">
+        <div class="hero-badge">Privacy-First Reasoning for Regulated Industries</div>
+        <h1>Your data never leaves<br>your machine</h1>
+        <p class="hero-sub">The AI only sees abstract variables, not names. Still reasons perfectly.</p>
+        <div class="hero-cta">
+            <a href="#get-started" class="btn-primary">Start Building</a>
+            <a href="#how-it-works" class="btn-secondary">See How</a>
+        </div>
+        <div class="terminal">
+            <div class="terminal-header">
+                <span class="terminal-dot red"></span>
+                <span class="terminal-dot yellow"></span>
+                <span class="terminal-dot green"></span>
+                <span class="terminal-title">reduct</span>
+            </div>
+            <div class="terminal-body">
+                <div class="terminal-line"><span class="prompt">$</span> curl -X POST /reason -d '{"query": "Dr. Evans is physician"}'</div>
+                <div class="terminal-line output">
+<span class="dim">input:</span>  "Dr. Evans is physician"<br>
+<span class="dim">abstract:</span>  IS(<span class="id">id_1</span>, <span class="id">id_2</span>)  <span class="comment">// model sees this only</span><br>
+<span class="dim">derived:</span>  IS(<span class="id">id_1</span>, <span class="id">id_5</span>), IS(<span class="id">id_1</span>, <span class="id">id_7</span>)<br>
+<span class="dim">output:</span>  "Dr. Evans has clinical_record_access"<br>
+<span class="dim">          </span>"Dr. Evans has audit_required"<br>
+<span class="dim">provenance:</span> IS(<span class="id">id_1</span>, <span class="id">id_7</span>) ← universal_instantiation ← [IS(<span class="id">id_1</span>, <span class="id">id_5</span>), ALL(<span class="id">id_5</span>, <span class="id">id_7</span>)] ← <span class="src">policy:hipaa_minimum_necessary</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="trust">
+        <div class="grid-3">
+            <div class="trust-card">
+                <div class="trust-icon">&#128274;</div>
+                <h3>Structural Abstraction</h3>
+                <p>Not redaction. Not masking. Entity names are replaced with abstract IDs <em>before</em> reaching any reasoning engine. The mapping never leaves your process.</p>
+            </div>
+            <div class="trust-card">
+                <div class="trust-icon">&#9889;</div>
+                <h3>Provably Correct</h3>
+                <p>Symbolic forward-chaining with guaranteed inference. 100% accuracy on novel entities. Not approximating — deriving.</p>
+            </div>
+            <div class="trust-card">
+                <div class="trust-icon">&#128220;</div>
+                <h3>Audit Trail</h3>
+                <p>Every derived conclusion traces back to its source facts and inference rule. Full provenance chain for compliance.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="how-it-works">
+        <h2>How It Works</h2>
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Abstract</h3>
+                <div class="step-diagram">
+                    <span class="plaintext">Dr. Evans</span>&nbsp;&rarr;&nbsp;<span class="id">id_1</span><br>
+                    <span class="plaintext">physician</span>&nbsp;&rarr;&nbsp;<span class="id">id_2</span><br>
+                    <span class="plaintext">clinical_access</span>&nbsp;&rarr;&nbsp;<span class="id">id_5</span>
+                </div>
+                <p>EntityRegistry maps every name to an abstract variable. The real names never leave your machine.</p>
+            </div>
+            <div class="step-arrow">&darr;</div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>Reason</h3>
+                <div class="step-diagram">
+                    IS(<span class="id">id_1</span>, <span class="id">id_2</span>)<br>
+                    ALL(<span class="id">id_2</span>, <span class="id">id_5</span>)<br>
+                    &there4; IS(<span class="id">id_1</span>, <span class="id">id_5</span>)
+                </div>
+                <p>The solver operates on abstract IDs. Universal instantiation, transitivity, conditionals — all provable.</p>
+            </div>
+            <div class="step-arrow">&darr;</div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>Restore</h3>
+                <div class="step-diagram">
+                    IS(<span class="id">id_1</span>, <span class="id">id_5</span>)<br>
+                    &darr;<br>
+                    <span class="plaintext">"Dr. Evans has clinical_record_access"</span>
+                </div>
+                <p>Results map back through the EntityRegistry. You see plain English. The model never did.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="capabilities">
+        <h2>Reasoning Capabilities</h2>
+        <div class="cap-grid">
+            <div class="cap-card">
+                <div class="cap-icon">&forall;</div>
+                <h3>Universal Rules</h3>
+                <p class="cap-pattern">ALL(X, Y) + IS(a, X) &rarr; IS(a, Y)</p>
+                <p class="cap-example">"All physicians have clinical access" + "Dr. Evans is physician" &rarr; Dr. Evans has clinical access</p>
+            </div>
+            <div class="cap-card">
+                <div class="cap-icon">&rarr;</div>
+                <h3>Transitivity</h3>
+                <p class="cap-pattern">ALL(X, Y) + ALL(Y, Z) &rarr; ALL(X, Z)</p>
+                <p class="cap-example">"Physicians &rarr; clinical access &rarr; PHI access &rarr; audit required" — full chain derived</p>
+            </div>
+            <div class="cap-card">
+                <div class="cap-icon">&rArr;</div>
+                <h3>Conditionals</h3>
+                <p class="cap-pattern">IF(X, Y) + IS(a, X) &rarr; IS(a, Y)</p>
+                <p class="cap-example">"If on-call then emergency_access" + "Nurse Kelly is on-call" &rarr; emergency access</p>
+            </div>
+            <div class="cap-card">
+                <div class="cap-icon">&not;</div>
+                <h3>Negation-as-Failure</h3>
+                <p class="cap-pattern">Cannot prove IS(a, X) &rarr; NOT_IS(a, X)</p>
+                <p class="cap-example">"No record that Bob is clinical staff" &rarr; Bob does not have clinical access (default-deny)</p>
+            </div>
+            <div class="cap-card">
+                <div class="cap-icon">&#9201;</div>
+                <h3>Temporal</h3>
+                <p class="cap-pattern">AFTER(N, X) + IS(a, X) &rarr; HOLDS(a, expires_after_N)</p>
+                <p class="cap-example">"After 90 days, terminated" + "Alice is terminated" &rarr; access expires</p>
+            </div>
+            <div class="cap-card">
+                <div class="cap-icon">#</div>
+                <h3>Cardinality</h3>
+                <p class="cap-pattern">AT_MOST(N, role), EXACTLY(N, role)</p>
+                <p class="cap-example">"At most 2 approvers" + 3 people have approver &rarr; violation flagged</p>
+            </div>
+            <div class="cap-card">
+                <div class="cap-icon">&#x229e;</div>
+                <h3>Mutual Exclusivity</h3>
+                <p class="cap-pattern">MUTEX(A, B) — no entity holds both</p>
+                <p class="cap-example">"Clinical and billing access are mutually exclusive" + Alice has both &rarr; violation</p>
+            </div>
+            <div class="cap-card">
+                <div class="cap-icon">&#x2295;</div>
+                <h3>Contradiction Detection</h3>
+                <p class="cap-pattern">IS(a, X) + NOT_IS(a, X) &rarr; CONTRADICTION</p>
+                <p class="cap-example">"Alice has access" + "Alice does not have access" &rarr; flagged immediately</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="verticals">
+        <h2>Built for Regulated Industries</h2>
+        <p class="section-sub">Where sending data to third-party AI is the blocker. We remove it.</p>
+        <div class="grid-4">
+            <div class="vert-card">
+                <div class="vert-label">Healthcare</div>
+                <h3>HIPAA Compliance</h3>
+                <p>Patient data access reasoning without exposing patient names. Minimum necessary standard, segregation of duties, emergency break-glass — all modeled as logic.</p>
+                <div class="vert-rule">45 CFR 164.502(b)</div>
+            </div>
+            <div class="vert-card">
+                <div class="vert-label">Finance</div>
+                <h3>SOX Compliance</h3>
+                <p>Access control and segregation of duties audits. Cardinality constraints ensure exactly N approvers. Mutually exclusive roles for fraud prevention.</p>
+                <div class="vert-rule">SOX Section 404</div>
+            </div>
+            <div class="vert-card">
+                <div class="vert-label">Legal</div>
+                <h3>Privilege Checks</h3>
+                <p>Conflict-of-interest detection and privilege scope reasoning. Negation-as-failure for default-deny access policies.</p>
+                <div class="vert-rule">ABA Model Rules</div>
+            </div>
+            <div class="vert-card">
+                <div class="vert-label">Defense</div>
+                <h3>Clearance Reasoning</h3>
+                <p>Multi-level security clearance derivation. Need-to-know propagation. Fully air-gapped operation — no network required.</p>
+                <div class="vert-rule">DoD 5200.01</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="proof">
+        <h2>Provenance Tracking</h2>
+        <p class="section-sub">Every derived fact traces back to its source. This is what compliance auditors need.</p>
+        <div class="provenance-box">
+            <pre>
+IS(Dr. Evans, audit_required)
+  &larr; universal_instantiation
+    IS(Dr. Evans, phi_access) <span class="dim">(derived)</span>
+      &larr; universal_instantiation
+        IS(Dr. Evans, clinical_record_access) <span class="dim">(derived)</span>
+          &larr; universal_instantiation
+            IS(Dr. Evans, physician) <span class="src">[query:query_employee]</span>
+            ALL(physician, clinical_record_access) <span class="src">[policy:hipaa_minimum_necessary]</span>
+        ALL(clinical_record_access, phi_access) <span class="src">[policy:hipaa_minimum_necessary]</span>
+    ALL(phi_access, audit_required) <span class="src">[policy:hipaa_accountability]</span>
+            </pre>
+        </div>
+        <div class="provenance-sources">
+            <div class="source-tag" data-type="user">user_input</div>
+            <div class="source-tag" data-type="policy">policy:name</div>
+            <div class="source-tag" data-type="query">query:tool</div>
+            <div class="source-tag" data-type="naf">closed_world</div>
+            <div class="source-tag" data-type="derived">derived</div>
+        </div>
+    </section>
+
+    <section id="api">
+        <h2>API</h2>
+        <p class="section-sub">One endpoint. Full reasoning pipeline. Configurable per domain.</p>
+        <div class="code-block">
+            <div class="code-header">
+                <span>POST /reason</span>
+                <button class="copy-btn" onclick="copyCode()">Copy</button>
+            </div>
+            <pre><code id="api-code">curl -X POST http://localhost:8000/reason \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "Dr. Evans is physician. What access does she have?",
+    "config_path": "config/domain_healthcare.yaml",
+    "naf_enabled": true
+  }'</code></pre>
+        </div>
+        <div class="code-block">
+            <div class="code-header"><span>Response</span></div>
+            <pre><code>{
+  "conclusions": [
+    "Dr. Evans has clinical_record_access",
+    "Dr. Evans has phi_access",
+    "Dr. Evans has audit_required"
+  ],
+  "naf_conclusions": ["Bob is not clinical_record_access"],
+  "cardinality_violations": [
+    { "constraint": "EXACTLY(1, primary_physician)", "actual": 2 }
+  ],
+  "mutex_violations": [],
+  "contradictions": [],
+  "explanations": ["...full provenance chain..."]
+}</code></pre>
+        </div>
+        <div class="api-endpoints">
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="path">/health</span>
+                <span class="desc">Server status and config info</span>
+            </div>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="path">/policies</span>
+                <span class="desc">List loaded policy domains</span>
+            </div>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="path">/entities</span>
+                <span class="desc">List loaded entities and roles</span>
+            </div>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="path">/constraints</span>
+                <span class="desc">List cardinality and mutex constraints</span>
+            </div>
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span class="path">/reason</span>
+                <span class="desc">Main reasoning endpoint</span>
+            </div>
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span class="path">/explain</span>
+                <span class="desc">Explain a specific conclusion</span>
+            </div>
+        </div>
+    </section>
+
+    <section id="models">
+        <h2>Works With Any AI Model</h2>
+        <p class="section-sub">The NL&rarr;Logic translation layer uses your choice of LLM. The solver always runs locally.</p>
+        <div class="model-grid">
+            <div class="model-card local">
+                <div class="model-tier">Fully Local</div>
+                <div class="model-name">Ollama</div>
+                <div class="model-desc">Zero data leaves your machine. qwen3, llama3, mistral — pick any.</div>
+                <div class="model-privacy">Privacy: &starf;&starf;&starf;&starf;&starf;</div>
+            </div>
+            <div class="model-card cloud">
+                <div class="model-tier">Cloud (Abstracted)</div>
+                <div class="model-name">Claude</div>
+                <div class="model-desc">Excellent NL understanding. Only sees id_1, id_2 — never real names.</div>
+                <div class="model-privacy">Privacy: &starf;&starf;&starf;&starf;&star;</div>
+            </div>
+            <div class="model-card cloud">
+                <div class="model-tier">Cloud (Abstracted)</div>
+                <div class="model-name">GPT-4o</div>
+                <div class="model-desc">Strong structured output. Entity abstraction applied before API call.</div>
+                <div class="model-privacy">Privacy: &starf;&starf;&starf;&starf;&star;</div>
+            </div>
+            <div class="model-card cloud">
+                <div class="model-tier">Cloud (Abstracted)</div>
+                <div class="model-name">Gemini</div>
+                <div class="model-desc">Google's model with abstraction layer. Structured JSON output.</div>
+                <div class="model-privacy">Privacy: &starf;&starf;&starf;&starf;&star;</div>
+            </div>
+            <div class="model-card rule">
+                <div class="model-tier">No AI Needed</div>
+                <div class="model-name">Rule-Based</div>
+                <div class="model-desc">Deterministic parser for standard patterns. No model, no network, no risk.</div>
+                <div class="model-privacy">Privacy: &starf;&starf;&starf;&starf;&starf;</div>
+            </div>
+        </div>
+        <p class="models-note">The solver <strong>always</strong> runs locally. The LLM is only used for natural language &rarr; logic translation. Entity names are abstracted before the LLM ever sees them.</p>
+    </section>
+
+    <section id="results">
+        <h2>The Proof</h2>
+        <div class="results-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Approach</th>
+                        <th>Novel Entity Accuracy</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="fail">
+                        <td>Standard Transformer</td>
+                        <td>0%</td>
+                        <td>Memorizes surface patterns, can't generalize</td>
+                    </tr>
+                    <tr class="fail">
+                        <td>Expanded Vocab (500 entities)</td>
+                        <td>0%</td>
+                        <td>More tokens = harder to memorize</td>
+                    </tr>
+                    <tr class="pass">
+                        <td><strong>Neuro-Symbolic (Reduct)</strong></td>
+                        <td><strong>100%</strong></td>
+                        <td>Solver operates on variables, not tokens</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="results-note">Novel entity accuracy means: entities the model has <em>never seen during training</em>. Standard transformers fail because they memorize token patterns, not abstract reasoning. Our solver proves correct inference regardless of entity names.</div>
+    </section>
+
+    <section id="get-started">
+        <h2>Get Started</h2>
+        <div class="code-block">
+            <div class="code-header"><span>Install &amp; Run</span><button class="copy-btn" onclick="copyInstall()">Copy</button></div>
+            <pre><code id="install-code">git clone https://github.com/hybridML/reduct.git
+cd reduct
+pip install -r requirements.txt
+
+# Start the API server
+uvicorn api.server:app --reload --port 8000
+
+# Or run the CLI demo
+python pipeline.py</code></pre>
+        </div>
+        <div class="start-grid">
+            <div class="start-card">
+                <h3>Configure Your Domain</h3>
+                <p>Edit <code>config/domain.yaml</code> with your policies, entities, and constraints. Or use the built-in HIPAA config.</p>
+            </div>
+            <div class="start-card">
+                <h3>Query</h3>
+                <p>POST to <code>/reason</code> with a natural language query. Get back derived conclusions, provenance chains, and constraint violations.</p>
+            </div>
+            <div class="start-card">
+                <h3>Audit</h3>
+                <p>Every derivation includes its full provenance chain. Trace any conclusion back to source facts and the inference rule used.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <span class="footer-logo">reduct</span>
+                <p>Privacy-preserving reasoning for regulated industries.</p>
+            </div>
+            <div class="footer-links">
+                <div>
+                    <h4>Product</h4>
+                    <a href="#how-it-works">How It Works</a>
+                    <a href="#capabilities">Capabilities</a>
+                    <a href="#verticals">Verticals</a>
+                    <a href="#api">API Reference</a>
+                </div>
+                <div>
+                    <h4>Resources</h4>
+                    <a href="#results">Research Results</a>
+                    <a href="#models">Supported Models</a>
+                    <a href="https://github.com/hybridML/reduct">GitHub</a>
+                </div>
+                <div>
+                    <h4>Legal</h4>
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Reduct. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        // Nav scroll effect
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('nav');
+            if (window.scrollY > 50) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+
+        // Copy to clipboard
+        function copyCode() {
+            navigator.clipboard.writeText(document.getElementById('api-code').textContent);
+        }
+        function copyInstall() {
+            navigator.clipboard.writeText(document.getElementById('install-code').textContent);
+        }
+
+        // Animate capabilities on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.cap-card, .trust-card, .vert-card, .step').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

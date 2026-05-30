@@ -1,0 +1,105 @@
+# reduct — Healthcare/HIPAA Domain Configuration
+#
+# This is the first sellable vertical: HIPAA-compliant access reasoning
+# for healthcare organizations. Every derivation is provenance-tracked
+# for audit compliance.
+#
+# Real HIPAA rules modeled as logic:
+# - Minimum Necessary: only access what you need for your role
+# - Role-Based Access: access tied to role, not identity
+# - Segregation: clinical and billing must be separate
+# - Emergency: break-glass access with audit trail
+# - Time-Limited: terminated employees lose access after 90 days
+# - Cardinality: at most 1 primary physician per patient
+
+policies:
+  hipaa_minimum_necessary:
+    description: "HIPAA Minimum Necessary Standard - 45 CFR 164.502(b)"
+    rules:
+      - "all physician are clinical_record_access"
+      - "all nurse are clinical_record_access"
+      - "all billing_staff are billing_record_access"
+      - "all admin_staff are demographic_access"
+      - "all clinical_record_access are phi_access"
+      - "all billing_record_access are phi_access"
+      - "all demographic_access are limited_phi_access"
+
+  hipaa_role_based:
+    description: "HIPAA Role-Based Access - 45 CFR 164.312(a)"
+    rules:
+      - "all attending_physician are write_prescription"
+      - "all resident_physician are read_prescription"
+      - "all pharmacist are verify_prescription"
+      - "all patient are own_record_access"
+      - "all emergency_physician are emergency_access"
+      - "all emergency_access are clinical_record_access"
+
+  hipaa_segregation:
+    description: "HIPAA Segregation of Duties - clinical and billing must be separate"
+    rules:
+      - "if emergency_physician then emergency_access"
+      - "if on_call then emergency_access"
+
+  hipaa_temporal:
+    description: "HIPAA Time-Limited Access - terminated/modified access"
+    rules:
+      - "after 0 days, terminated_employee"
+      - "after 30 days, inactive_employee"
+      - "after 90 days, retired_record"
+
+  hipaa_accountability:
+    description: "HIPAA Access Accountability - must audit"
+    rules:
+      - "all phi_access are audit_required"
+      - "all emergency_access are audit_required"
+      - "all limited_phi_access are audit_logged"
+
+entities:
+  employees:
+    Dr. Evans:
+      roles: [physician, attending_physician]
+    Dr. Park:
+      roles: [physician, attending_physician]
+    Nurse Kelly:
+      roles: [nurse, on_call]
+    Bob:
+      roles: [billing_staff]
+    Carol:
+      roles: [admin_staff]
+    Dr. Quinn:
+      roles: [emergency_physician, physician]
+    Alice:
+      roles: [terminated_employee]
+    Dan:
+      roles: [pharmacist]
+
+  role_index:
+    physician: [Dr. Evans, Dr. Park]
+    attending_physician: [Dr. Evans, Dr. Park]
+    nurse: [Nurse Kelly]
+    on_call: [Nurse Kelly]
+    billing_staff: [Bob]
+    admin_staff: [Carol]
+    emergency_physician: [Dr. Quinn]
+    terminated_employee: [Alice]
+    pharmacist: [Dan]
+
+constraints:
+  cardinality:
+    - "at most 1 primary_physician"
+    - "exactly 1 patient_advocate"
+  mutex:
+    - "clinical_record_access and billing_record_access are mutually exclusive"
+    - "billing_staff and physician are mutually exclusive"
+
+solver:
+  max_iterations: 30
+  detect_contradictions: true
+  track_provenance: true
+  naf_enabled: true
+  naf_predicates:
+    - clinical_record_access
+    - billing_record_access
+    - phi_access
+    - emergency_access
+    - write_prescription

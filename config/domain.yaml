@@ -1,0 +1,77 @@
+# reduct Domain Configuration
+# Organizations define their own policies, entities, and rules here.
+# This file is loaded at startup and can be hot-reloaded without restarting.
+
+# Organizations can have multiple policy domains.
+# Each domain has universal rules (ALL statements) that the solver reasons over.
+policies:
+  finance_access:
+    description: "Financial system access control"
+    rules:
+      - "all finance_employee are budget_portal_access"
+      - "all budget_portal_access are expense_system"
+      - "all vp_approved are cfo_review"
+      - "all submitted_expense are audit_trail"
+
+  hr_policies:
+    description: "Human resources policies"
+    rules:
+      - "all full_time_employee are health_benefits"
+      - "all contractor are limited_access"
+      - "all limited_access are reporting_portal"
+      - "all terminated_employee are revoked_access"
+
+  medical:
+    description: "HIPAA and medical data access"
+    rules:
+      - "all patient_record are phi"
+      - "all phi are encrypted_at_rest"
+      - "all phi are access_audit"
+      - "all encrypted_at_rest are hipaa_compliant"
+
+# Entities (people, systems, roles) — loaded from your HR system or identity provider
+entities:
+  employees:
+    Alice:
+      roles: [finance_employee, full_time_employee]
+    Bob:
+      roles: [contractor]
+    Charlie:
+      roles: [finance_employee, terminated_employee]
+    Diana:
+      roles: [vp_approved, full_time_employee]
+    Dr. Evans:
+      roles: [physician]
+
+  role_index:
+    finance_employee: [Alice, Diana]
+    contractor: [Bob]
+    vp_approved: [Diana]
+    physician: [Dr. Evans]
+    full_time_employee: [Alice, Diana]
+    terminated_employee: [Charlie]
+
+# Solver configuration
+solver:
+  # Maximum forward-chaining iterations
+  max_iterations: 20
+  
+  # Enable contradiction detection
+  detect_contradictions: true
+
+  # Provenance tracking (every derivation traces back to source facts)
+  track_provenance: true
+
+# LLM configuration (for NL translation)
+llm:
+  # Provider: "ollama" for local, "none" for rule-based only
+  provider: ollama
+  
+  # Model selection (tries in order, uses first available)
+  models:
+    - qwen2.5-coder:1.5b
+    - qwen3:1.7b
+    - qwen3:4b
+  
+  # Timeout in seconds
+  timeout: 90
