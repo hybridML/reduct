@@ -700,6 +700,88 @@ def impact(request: ImpactRequest):
     )
 
 
+# ──────────────────────────────────────────────────────
+#  POST /chat — LLM privacy proxy
+# ──────────────────────────────────────────────────────
+
+class ChatRequest(BaseModel):
+    message: str = Field(..., description="User message in plain English (will be redacted before LLM)")
+    context: Optional[Dict[str, str]] = Field(None, description="Entity name → category mapping, e.g. {'John Smith': 'person', 'metformin': 'drug'}")
+    domain: Optional[str] = Field(None, description="Industry domain: healthcare, finance, legal, defense")
+    llm_backend: Optional[str] = Field(None, description="LLM backend: ollama, openai, anthropic")
+    llm_model: Optional[str] = Field(None, description="Model name (e.g. qwen3:4b, gpt-4o, claude-sonnet-4-20250514)")
+
+
+class ChatAuditItem(BaseModel):
+    entity: str
+    alias: str
+    category: str
+
+
+class ChatResponse(BaseModel):
+    response: str = Field(..., description="LLM response with real names restored")
+    alias_input: str = Field(..., description="What the LLM saw (synthetic aliases)")
+    alias_output: str = Field(..., description="What the LLM returned (synthetic aliases)")
+    audit: Dict = Field(..., description="Audit trail: mapping, backend, PII status")
+
+
+@app.post("/chat", response_model=ChatResponse)
+def chat(request: ChatRequest):
+    from proxy.reduct_proxy import AliasMapper, ProxyConfig, _scrub_pii, DOMAIN_SYSTEM_PROMPTS
+    from proxy.backends import BACKENDS
+
+    domain = request.domain or "healthcare"
+    backend_name = request.llm_backend or "ollama"
+
+    config = ProxyConfig(
+        domain=domain,
+        llm_backend=backend_name,
+        llm_model=request.llm_model or "qwen3:4b",
+    )
+
+    mapper = AliasMapper()
+
+    # Register context entities
+    if request.context:
+        for name, category in request.context.items():
+            mapper.register(name, category)
+
+    # Auto-detect and register remaining entities
+    alias_input = mapper.auto_redact(request.message, domain)
+    alias_input = _scrub_pii(alias_input, config)
+
+    # Build system prompt
+    system_prompt = DOMAIN_SYSTEM_PROMPTS.get(domain, DOMAIN_SYSTEM_PROMPTS["healthcare"])
+
+    # Call LLM
+    backend_cls = BACKENDS.get(backend_name)
+    if not backend_cls:
+        raise HTTPException(status_code=400, detail=f"Unknown LLM backend: {backend_name}. Choose from: {list(BACKENDS.keys())}")
+
+    try:
+        backend = backend_cls()
+        llm_response = backend.complete(alias_input, system_prompt, config)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"LLM backend error: {str(e)}")
+
+    # Restore real names
+    restored_response = mapper.restore(llm_response)
+
+    return ChatResponse(
+        response=restored_response,
+        alias_input=alias_input,
+        alias_output=llm_response,
+        audit={
+            "entities_redacted": len(mapper.mapping),
+            "entity_mapping": mapper.mapping,
+            "llm_backend": backend_name,
+            "llm_model": config.llm_model,
+            "pii_sent_to_llm": False,
+            "domain": domain,
+        },
+    )
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

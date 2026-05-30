@@ -1,0 +1,53 @@
+# Legal Industry Template
+#
+# Reduct uses these patterns to automatically detect and redact
+# client names, case details, and privilege information from LLMs.
+
+domain: legal
+description: "Legal research and conflict checking with zero client data exposure to LLMs"
+
+entities:
+  # Legal role types
+  - partner
+  - associate
+  - paralegal
+  - judge
+  - prosecutor
+  - defense_counsel
+  - mediator
+  - arbitrator
+  # Case types
+  - civil_litigation
+  - criminal_defense
+  - corporate_merger
+  - IP_patent
+  - employment_dispute
+  - real_estate
+  - family_law
+  - immigration
+  - tax_dispute
+  # Privilege types
+  - attorney_client_privilege
+  - work_product_doctrine
+  - joint_defense_privilege
+  - attorney_work_product
+
+patterns:
+  - "\\b[A-Z][a-z]+\\s+[A-Z][a-z]+\\s+(v\\.|vs\\.?)\\s+[A-Z][a-z]+\\s+[A-Z][a-z]+"  # Case names
+  - "\\bCase\\s*#?\\s*[:\\-]?\\s*\\d+\\b"  # Case numbers
+  - "\\b\\d{4}\\s+[A-Z][a-z]+\\s+\\d+\\b"   # Docket numbers
+  - "\\b[A-Z][a-z]+\\s+[A-Z][a-z]+\\b"        # Names
+
+context_template:
+  client_name: "string"        # Maps to ENT_N
+  opposing_party: "string"     # Maps to ENT_N
+  matter_type: "string"        # Maps to ENT_N
+  jurisdiction: "string"       # Maps to ENT_N
+  practice_area: "string"     # Maps to ENT_N
+
+example_prompts:
+  - "Is there a conflict of interest between {client_a} and {client_b}?"
+  - "Does {client} have privilege over {communication}?"
+  - "What are the disclosure requirements for {matter_type} in {jurisdiction}?"
+  - "Can {attorney} represent {client} given their existing obligations to {other_client}?"
+  - "What is the standard of review for {issue} in {jurisdiction}?"

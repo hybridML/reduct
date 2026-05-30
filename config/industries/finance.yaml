@@ -1,0 +1,56 @@
+# Finance / SOX Industry Template
+#
+# Reduct uses these patterns to automatically detect and redact
+# PII and financial data before it reaches any LLM.
+
+domain: finance
+description: "Financial compliance and risk analysis with zero PII exposure to LLMs"
+
+entities:
+  # Common financial terms
+  - checking_account
+  - savings_account
+  - credit_card
+  - mortgage
+  - auto_loan
+  - personal_loan
+  - investment_portfolio
+  - retirement_account
+  - wire_transfer
+  - ACH_transfer
+  # Compliance terms
+  - SOX
+  - KYC
+  - AML
+  - OFAC
+  - Dodd_Frank
+  - Basel_III
+  - FATCA
+  # Role types
+  - approver
+  - reviewer
+  - trader
+  - compliance_officer
+  - risk_manager
+  - auditor
+
+patterns:
+  - "\\b\\d{3}-\\d{2}-\\d{4}\\b"           # SSN
+  - "\\b\\d{9}\\b"                          # Account numbers
+  - "\\b\\$[\\d,]+\\.?\\d*\\b"              # Dollar amounts
+  - "\\b[A-Z]{2}\\d{2}[A-Z0-9]{4,}\\b"      # IBAN/SWIFT codes
+  - "\\b\\d{4}[-\\s]?\\d{4}[-\\s]?\\d{4}[-\\s]?\\d{4}\\b"  # Card numbers
+
+context_template:
+  account_holder: "string"     # Maps to ENT_N
+  account_type: "string"       # Maps to ENT_N
+  transaction_amount: "number" # Obfuscated to range
+  counterparty: "string"       # Maps to ENT_N
+  jurisdiction: "string"       # Maps to ENT_N
+
+example_prompts:
+  - "Is {account_holder} compliant with SOX section 404?"
+  - "Does {transaction} violate any AML rules?"
+  - "Can {account_holder} approve {transaction} according to segregation of duties?"
+  - "What is the risk level for {counterparty} in {jurisdiction}?"
+  - "Are there any conflicts of interest between {entity_a} and {entity_b}?"

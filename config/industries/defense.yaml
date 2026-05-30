@@ -1,0 +1,59 @@
+# Defense / Classified Industry Template
+#
+# Reduct uses these patterns to automatically detect and redact
+# clearance levels, names, unit designations, and classified references
+# from LLMs. Air-gapped operation supported via Ollama.
+
+domain: defense
+description: "Security clearance and access control reasoning with zero classified data exposure to LLMs"
+
+entities:
+  # Clearance levels
+  - Top_Secret
+  - Secret
+  - Confidential
+  - TS_SCI
+  - Sensitive_Compartmented_Information
+  # Access categories
+  - NOFORN
+  - ORCON
+  - WNINTEL
+  - COMSEC
+  - SI
+  - TK
+  - GAMMA
+  # Unit types
+  - infantry
+  - armor
+  - artillery
+  - aviation
+  - special_operations
+  - cyber_command
+  - intelligence
+  - logistics
+  # Role types
+  - commander
+  - analyst
+  - operator
+  - liaison
+  - inspector
+
+patterns:
+  - "\\bSCI\\b"                          # SCI designator
+  - "\\b[A-Z]{2,4}/[A-Z]{2,4}\\b"        # Classification compartments like SI/TK
+  - "\\b\\d{1,2}[A-Z][a-z]+\\s+\\d+\\b"  # Unit designations like 3rd Battalion
+  - "\\b[A-Z][a-z]+\\s+[A-Z][a-z]+\\b"   # Names
+
+context_template:
+  personnel_id: "string"       # Maps to ENT_N
+  clearance_level: "string"    # Maps to ENT_N
+  compartment: "string"        # Maps to ENT_N
+  unit: "string"               # Maps to ENT_N
+  mission: "string"            # Maps to ENT_N
+
+example_prompts:
+  - "Can {personnel} access {compartment} given their {clearance_level}?"
+  - "Does {personnel} have need-to-know for {mission}?"
+  - "What compartmentalization constraints apply to {unit}?"
+  - "Is there a conflict between {personnel_a}'s access and {personnel_b}'s mission?"
+  - "What declassification timeline applies to {mission}?"
