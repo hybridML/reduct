@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reduct</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #0a0a0f; --bg-card: #12121a; --bg-elevated: #1a1a28;
+            --border: #2a2a3a; --text: #e8e8f0; --text-dim: #8888a0;
+            --accent: #6c5ce7; --accent-light: #a29bfe; --green: #00d2a0;
+            --red: #ff4757; --yellow: #ffd32a; --blue: #45aaf2;
+            --mono: 'SF Mono', 'JetBrains Mono', 'Fira Code', monospace;
+            --sans: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+        }
+        body { font-family: var(--sans); background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
+        
+        .app { display: grid; grid-template-columns: 260px 1fr; grid-template-rows: 1fr; height: 100vh; }
+        
+        /* ── Sidebar ── */
+        .sidebar { background: var(--bg-card); border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; }
+        .logo { font-family: var(--mono); font-size: 1.4rem; font-weight: 700; color: #fff; margin-bottom: 4px; }
+        .logo-sub { font-size: 0.75rem; color: var(--text-dim); margin-bottom: 24px; }
+        .section-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); margin-bottom: 10px; margin-top: 20px; }
+        
+        .backend-options { display: flex; flex-direction: column; gap: 6px; }
+        .backend-btn { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text); cursor: pointer; font-size: 0.85rem; text-align: left; transition: all 0.15s; font-family: var(--sans); }
+        .backend-btn:hover { border-color: var(--accent); }
+        .backend-btn.active { border-color: var(--accent); background: rgba(108,92,231,0.15); }
+        .backend-btn .label { font-weight: 600; }
+        .backend-btn .desc { font-size: 0.7rem; color: var(--text-dim); margin-top: 2px; }
+        .backend-btn .privacy { font-size: 0.65rem; color: var(--green); margin-top: 4px; font-weight: 600; }
+        
+        .domain-options { display: flex; flex-direction: column; gap: 6px; }
+        .domain-btn { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; color: var(--text); cursor: pointer; font-size: 0.8rem; text-align: left; transition: all 0.15s; font-family: var(--sans); }
+        .domain-btn:hover { border-color: var(--accent); }
+        .domain-btn.active { border-color: var(--accent); background: rgba(108,92,231,0.15); }
+        
+        .model-row { margin-top: 6px; }
+        .model-label { font-size: 0.75rem; color: var(--text-dim); margin-bottom: 4px; }
+        .model-input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; color: var(--text); font-family: var(--mono); font-size: 0.8rem; }
+        .model-input:focus { outline: none; border-color: var(--accent); }
+        
+        .ollama-status { margin-top: 8px; font-size: 0.75rem; padding: 6px 8px; border-radius: 6px; }
+        .ollama-status.connected { background: rgba(0,210,160,0.1); color: var(--green); }
+        .ollama-status.disconnected { background: rgba(255,71,87,0.1); color: var(--red); }
+        
+        .sidebar-footer { margin-top: auto; font-size: 0.7rem; color: var(--text-dim); text-align: center; }
+        
+        /* ── Main area ── */
+        .main { display: flex; flex-direction: column; height: 100vh; }
+        
+        .header { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+        .header-title { font-size: 1rem; font-weight: 600; }
+        .header-badges { display: flex; gap: 8px; }
+        .badge { font-size: 0.7rem; padding: 3px 10px; border-radius: 100px; font-weight: 600; }
+        .badge-green { background: rgba(0,210,160,0.15); color: var(--green); }
+        .badge-purple { background: rgba(108,92,231,0.15); color: var(--accent-light); }
+        
+        .chat-area { flex: 1; overflow-y: auto; padding: 24px; }
+        
+        .message { margin-bottom: 20px; max-width: 700px; }
+        .message.user { margin-left: auto; }
+        .message.assistant { margin-right: auto; }
+        .message-role { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .message.user .message-role { color: var(--accent-light); }
+        .message.assistant .message-role { color: var(--green); }
+        .message-bubble { padding: 14px 18px; border-radius: 14px; font-size: 0.9rem; line-height: 1.6; }
+        .message.user .message-bubble { background: var(--accent); color: white; border-bottom-right-radius: 4px; }
+        .message.assistant .message-bubble { background: var(--bg-card); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+        
+        .alias-toggle { margin-top: 8px; font-size: 0.75rem; color: var(--text-dim); cursor: pointer; }
+        .alias-toggle:hover { color: var(--text); }
+        .alias-box { margin-top: 8px; padding: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; font-family: var(--mono); font-size: 0.78rem; color: var(--text-dim); white-space: pre-wrap; max-height: 200px; overflow-y: auto; display: none; }
+        .alias-box.visible { display: block; }
+        
+        .audit-banner { margin-top: 10px; padding: 8px 12px; border-radius: 8px; background: rgba(0,210,160,0.08); border: 1px solid rgba(0,210,160,0.2); display: flex; align-items: center; gap: 8px; font-size: 0.78rem; }
+        .audit-icon { color: var(--green); }
+        .audit-stats { color: var(--text-dim); font-family: var(--mono); font-size: 0.72rem; }
+        
+        .mapping-table { margin-top: 8px; width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+        .mapping-table th { text-align: left; padding: 4px 8px; border-bottom: 1px solid var(--border); color: var(--text-dim); font-weight: 600; }
+        .mapping-table td { padding: 4px 8px; font-family: var(--mono); }
+        .mapping-table td.real { color: var(--text); }
+        .mapping-table td.alias { color: var(--accent-light); }
+        
+        /* ── Input area ── */
+        .input-area { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 10px; align-items: flex-end; }
+        .input-wrapper { flex: 1; position: relative; }
+        .context-hint { position: absolute; top: -18px; font-size: 0.65rem; color: var(--text-dim); }
+        .chat-input { width: 100%; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; color: var(--text); font-family: var(--sans); font-size: 0.9rem; resize: none; min-height: 52px; max-height: 200px; }
+        .chat-input:focus { outline: none; border-color: var(--accent); }
+        .chat-input::placeholder { color: var(--text-dim); }
+        
+        .send-btn { background: var(--accent); border: none; border-radius: 12px; padding: 14px 20px; color: white; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: background 0.15s; font-family: var(--sans); }
+        .send-btn:hover { background: #5a4db5; }
+        .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .loading { display: none; align-items: center; gap: 8px; color: var(--text-dim); font-size: 0.85rem; padding: 12px 0; }
+        .loading.visible { display: flex; }
+        .spinner { width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <div class="sidebar">
+            <div class="logo">reduct</div>
+            <div class="logo-sub">Privacy layer for AI chats</div>
+            
+            <div class="section-label">LLM Backend</div>
+            <div class="backend-options">
+                <button class="backend-btn active" data-backend="ollama" onclick="setBackend('ollama')">
+                    <div class="label">Ollama (Local)</div>
+                    <div class="desc">Runs on your machine. Zero data leaves.</div>
+                    <div class="privacy">&#9733;&#9733;&#9733;&#9733;&#9733; Privacy</div>
+                </button>
+                <button class="backend-btn" data-backend="openai" onclick="setBackend('openai')">
+                    <div class="label">OpenAI</div>
+                    <div class="desc">GPT-4o. Only aliases sent — no real data.</div>
+                    <div class="privacy">&#9733;&#9733;&#9733;&#9733;&#97334; Privacy</div>
+                </button>
+                <button class="backend-btn" data-backend="anthropic" onclick="setBackend('anthropic')">
+                    <div class="label">Anthropic</div>
+                    <div class="desc">Claude. Only aliases sent — no real data.</div>
+                    <div class="privacy">&#9733;&#9733;&#9733;&#9733;&#97334; Privacy</div>
+                </button>
+                <button class="backend-btn" data-backend="rule" onclick="setBackend('rule')">
+                    <div class="label">Rule-Based (No AI)</div>
+                    <div class="desc">No model needed. Deterministic reasoning only.</div>
+                    <div class="privacy">&#9733;&#9733;&#9733;&#9733;&#9733; Privacy</div>
+                </button>
+            </div>
+            
+            <div id="ollamaStatus" class="ollama-status disconnected">Checking Ollama...</div>
+            
+            <div class="model-row">
+                <div class="model-label">Model</div>
+                <input class="model-input" id="modelInput" value="qwen3:4b" placeholder="e.g. qwen3:4b, gpt-4o, claude-sonnet-4-20250514" />
+            </div>
+            
+            <div class="section-label">Industry Domain</div>
+            <div class="domain-options">
+                <button class="domain-btn active" data-domain="healthcare" onclick="setDomain('healthcare')">Healthcare / HIPAA</button>
+                <button class="domain-btn" data-domain="finance" onclick="setDomain('finance')">Finance / SOX</button>
+                <button class="domain-btn" data-domain="legal" onclick="setDomain('legal')">Legal</button>
+                <button class="domain-btn" data-domain="defense" onclick="setDomain('defense')">Defense / Classified</button>
+            </div>
+            
+            <div class="sidebar-footer">Reduct v1.0 — Your data never leaves your machine</div>
+        </div>
+        
+        <div class="main">
+            <div class="header">
+                <div class="header-title">Chat</div>
+                <div class="header-badges">
+                    <span class="badge badge-green">&#128274; No PII sent to LLM</span>
+                    <span class="badge badge-purple" id="domainBadge">Healthcare</span>
+                </div>
+            </div>
+            
+            <div class="chat-area" id="chatArea">
+                <div class="message assistant">
+                    <div class="message-role">Reduct</div>
+                    <div class="message-bubble">
+                        Ask a question about your data. I'll replace all names, drugs, account numbers, and other sensitive data with synthetic aliases before sending to the AI. The AI never sees real data — only the aliases. When the AI responds, I'll map the aliases back to real names for you.
+                        <br><br>
+                        <strong>Try:</strong> "Can John Smith take metformin with his current medications?"
+                    </div>
+                </div>
+            </div>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <span>Reasoning with aliases...</span>
+            </div>
+            
+            <div class="input-area">
+                <div class="input-wrapper">
+                    <div class="context-hint">Tip: Add context like names, drugs, or account numbers — they'll be replaced with aliases automatically</div>
+                    <textarea class="chat-input" id="chatInput" placeholder="Type your question here... (Enter to send, Shift+Enter for new line)" rows="1"></textarea>
+                </div>
+                <button class="send-btn" id="sendBtn" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentBackend = 'ollama';
+        let currentDomain = 'healthcare';
+        let currentModel = 'qwen3:4b';
+        
+        // Check Ollama on load
+        async function checkOllama() {
+            const el = document.getElementById('ollamaStatus');
+            try {
+                if (window.reduct && window.reduct.checkOllama) {
+                    const result = await window.reduct.checkOllama();
+                    if (result.available) {
+                        el.textContent = '● Ollama connected — ' + (result.models.length || 0) + ' model(s) available';
+                        el.className = 'ollama-status connected';
+                    } else {
+                        el.textContent = '○ Ollama not found — install at ollama.ai';
+                        el.className = 'ollama-status disconnected';
+                    }
+                } else {
+                    // Web fallback
+                    const resp = await fetch('http://localhost:11434/api/tags').catch(() => null);
+                    if (resp && resp.ok) {
+                        const data = await resp.json();
+                        el.textContent = '● Ollama connected — ' + (data.models?.length || 0) + ' model(s)';
+                        el.className = 'ollama-status connected';
+                    } else {
+                        el.textContent = '○ Ollama not found — install at ollama.ai';
+                        el.className = 'ollama-status disconnected';
+                    }
+                }
+            } catch (e) {
+                el.textContent = '○ Ollama not found — install at ollama.ai';
+                el.className = 'ollama-status disconnected';
+            }
+        }
+        checkOllama();
+        
+        function setBackend(backend) {
+            currentBackend = backend;
+            document.querySelectorAll('.backend-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[data-backend="${backend}"]`).classList.add('active');
+            // Suggest model
+            const models = { ollama: 'qwen3:4b', openai: 'gpt-4o', anthropic: 'claude-sonnet-4-20250514', rule: 'rule-based' };
+            document.getElementById('modelInput').value = models[backend] || currentModel;
+        }
+        
+        function setDomain(domain) {
+            currentDomain = domain;
+            document.querySelectorAll('.domain-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[data-domain="${domain}"]`).classList.add('active');
+            const labels = { healthcare: 'Healthcare', finance: 'Finance', legal: 'Legal', defense: 'Defense' };
+            document.getElementById('domainBadge').textContent = labels[domain];
+        }
+        
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+            input.value = '';
+            
+            // Add user message
+            addMessage('user', message);
+            
+            // Show loading
+            document.getElementById('loading').classList.add('visible');
+            document.getElementById('sendBtn').disabled = true;
+            
+            currentModel = document.getElementById('modelInput').value || 'qwen3:4b';
+            
+            // Detect context entities
+            const words = message.split(/\s+/);
+            const context = {};
+            words.forEach(word => {
+                if (word.match(/^[A-Z][a-z]+/) && word.length > 2) {
+                    context[word] = 'person';
+                }
+            });
+            
+            try {
+                let result;
+                
+                if (currentBackend === 'rule') {
+                    // Use the /reason API for rule-based
+                    const resp = await fetch('http://localhost:8000/reason', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query: message, use_llm: false })
+                    });
+                    const data = await resp.json();
+                    result = {
+                        response: data.conclusions?.join('. ') || 'No conclusions derived.',
+                        alias_input: message,
+                        alias_output: data.conclusions?.join('. ') || '',
+                        audit: { entities_redacted: 0, pii_sent_to_llm: false, domain: currentDomain, llm_backend: 'rule-based' }
+                    };
+                } else if (window.reduct && window.reduct.chat) {
+                    // Electron mode
+                    result = await window.reduct.chat({
+                        message, context, domain: currentDomain,
+                        backend: currentBackend, model: currentModel
+                    });
+                } else {
+                    // Web mode — call /chat API
+                    const resp = await fetch('http://localhost:8000/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message, context, domain: currentDomain, llm_backend: currentBackend, llm_model: currentModel })
+                    });
+                    result = await resp.json();
+                }
+                
+                addMessage('assistant', result.response || result.error || 'No response', result);
+            } catch (e) {
+                addMessage('assistant', 'Error: ' + (e.message || String(e)));
+            }
+            
+            document.getElementById('loading').classList.remove('visible');
+            document.getElementById('sendBtn').disabled = false;
+        }
+        
+        function addMessage(role, content, result) {
+            const chatArea = document.getElementById('chatArea');
+            const div = document.createElement('div');
+            div.className = `message ${role}`;
+            
+            let html = `<div class="message-role">${role === 'user' ? 'You' : 'Reduct'}</div>`;
+            html += `<div class="message-bubble">${escapeHtml(content)}</div>`;
+            
+            if (result && result.audit) {
+                const a = result.audit;
+                html += `<div class="audit-banner">
+                    <span class="audit-icon">&#128274;</span>
+                    <span>${a.entities_redacted} entities redacted</span>
+                    <span class="audit-stats"> | Backend: ${a.llm_backend} | PII sent: ${a.pii_sent_to_llm ? 'YES ⚠️' : 'NO ✓'}</span>
+                </div>`;
+                
+                if (result.alias_input && result.alias_input !== content) {
+                    const aliasId = 'alias-' + Date.now();
+                    html += `<div class="alias-toggle" onclick="toggleAlias('${aliasId}')">&#9660; Show what the LLM saw</div>`;
+                    html += `<div class="alias-box" id="${aliasId}">${escapeHtml(result.alias_input)}</div>`;
+                }
+                
+                if (a.entity_mapping && Object.keys(a.entity_mapping).length > 0) {
+                    html += `<div class="alias-toggle" onclick="toggleAlias('mapping-${Date.now()}')">&#9660; Show entity mapping</div>`;
+                    html += `<div class="alias-box" id="mapping-${Date.now()}"><table class="mapping-table"><tr><th>Real Name</th><th>Alias Sent to LLM</th></tr>`;
+                    for (const [real, alias] of Object.entries(a.entity_mapping)) {
+                        html += `<tr><td class="real">${escapeHtml(real)}</td><td class="alias">${escapeHtml(alias)}</td></tr>`;
+                    }
+                    html += `</table></div>`;
+                }
+            }
+            
+            div.innerHTML = html;
+            chatArea.appendChild(div);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+        
+        function toggleAlias(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.toggle('visible');
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Enter to send
+        document.getElementById('chatInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+{
+  "name": "reduct",
+  "version": "1.0.0",
+  "description": "Privacy layer for AI chats — your data never leaves your machine",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win"
+  },
+  "build": {
+    "appId": "ai.reduct.desktop",
+    "productName": "Reduct",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "ui/**/*",
+      "../proxy/**/*",
+      "../api/**/*",
+      "../exp2_neurosymbolic/**/*",
+      "../pipeline.py",
+      "../config/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity"
+    }
+  },
+  "devDependencies": {
+    "electron": "^36.4.0",
+    "electron-builder": "^26.0.12"
+  },
+  "dependencies": {
+    "python-shell": "^5.0.0"
+  }
+}
